@@ -1,18 +1,29 @@
+import {
+  COGNITO_USER_POOL_ID,
+  COGNITO_CLIENT_ID,
+  AWS_REGION,
+  GRAPHQL_ENDPOINT,
+  OPEN_WEATHER_API_KEY,
+  WEATHER_BASE_URL,
+  TEST_USER_EMAIL,
+  TEST_USER_PASSWORD
+} from '@env';
+
 export const config = {
-    cognito: {
-      userPoolId: 'eu-west-1_GbdAS6D4M',
-      userPoolClientId: '2tbc22gviqulfg9u0no6k61288',
-      region: 'eu-west-1',
-    },
-    graphql: {
-      endpoint: 'https://nlop9z9t2e.execute-api.eu-west-1.amazonaws.com/',
-    },
-    weather: {
-      apiKey: 'YOUR_OPENWEATHERMAP_API_KEY', // You'll need to get this
-      baseUrl: 'https://api.openweathermap.org/data/2.5',
-    },
-    testUser: {
-      email: 'francomanzanares@gmail.com',
-      password: '$RFW4r76v5',
-    },
-  };
+  cognito: {
+    userPoolId: COGNITO_USER_POOL_ID,
+    userPoolClientId: COGNITO_CLIENT_ID,
+    region: AWS_REGION,
+  },
+  graphql: {
+    endpoint: GRAPHQL_ENDPOINT,
+  },
+  weather: {
+    apiKey: OPEN_WEATHER_API_KEY,
+    baseUrl: WEATHER_BASE_URL,
+  },
+  testUser: {
+    email: TEST_USER_EMAIL,
+    password: TEST_USER_PASSWORD,
+  },
+};

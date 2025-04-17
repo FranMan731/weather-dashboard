@@ -1,12 +1,10 @@
 import { WeatherResponse } from '@/types/weather';
-
-const API_KEY = '65d5dffea1077d3f31fcf02c8d972d87';
-const BASE_URL = 'https://api.openweathermap.org/data/2.5';
+import { OPEN_WEATHER_API_KEY, WEATHER_BASE_URL } from '@env';
 
 export const fetchWeatherByCity = async (city: string): Promise<WeatherResponse> => {
   try {
     const response = await fetch(
-      `${BASE_URL}/weather?q=${city}&appid=${API_KEY}&units=metric`
+      `${WEATHER_BASE_URL}/weather?q=${city}&appid=${OPEN_WEATHER_API_KEY}&units=metric`
     );
     
     if (!response.ok) {
@@ -24,7 +22,7 @@ export const fetchWeatherByCity = async (city: string): Promise<WeatherResponse>
 export const fetchWeatherByCoords = async (lat: number, lon: number): Promise<WeatherResponse> => {
   try {
     const response = await fetch(
-      `${BASE_URL}/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`
+      `${WEATHER_BASE_URL}/weather?lat=${lat}&lon=${lon}&appid=${OPEN_WEATHER_API_KEY}&units=metric`
     );
     
     if (!response.ok) {
