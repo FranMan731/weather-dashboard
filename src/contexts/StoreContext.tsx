@@ -1,6 +1,6 @@
 import React, { createContext, useContext } from 'react';
-import { weatherStore, WeatherStoreType} from './weather.store';
-import { authStore, AuthStoreType } from './auth.store';
+import { weatherStore, WeatherStoreType} from '@/stores/weather.store';
+import { authStore, AuthStoreType } from '@/stores/auth.store';
 
 interface Stores {
   weatherStore: WeatherStoreType;
