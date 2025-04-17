@@ -1,71 +1,28 @@
-import { useState } from 'react';
-import { signIn, signOut, getCurrentUser } from '../lib/api';
-import { ApiError, toApiError } from '../types/errors';
-import { AuthUser, UseAuthReturn } from '../types/auth';
+import { useStore } from '@/stores/storeContext';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '@/types/navigation';
+import { useEffect } from 'react';
 
-export const useAuth = (): UseAuthReturn => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<ApiError | null>(null);
-  const [user, setUser] = useState<AuthUser | null>(null);
+export const useAuth = () => {
+  const { authStore } = useStore();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
-  const authSignIn = async (username: string, password: string): Promise<AuthUser> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const user = await signIn({ username, password });
-      setUser(user);
-      return user;
-    } catch (err) {
-      const authError = toApiError(err);
-      setError(authError);
-      throw authError;
-    } finally {
-      setIsLoading(false);
+  useEffect(() => {
+    if (authStore.user) {
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Main' }],
+      });
     }
-  };
-
-  const authSignOut = async (): Promise<void> => {
-    setIsLoading(true);
-    try {
-      await signOut();
-      setUser(null);
-      setError(null);
-    } catch (err) {
-      const authError = toApiError(err);
-      setError(authError);
-      console.error('Error signing out: ', authError.message);
-      throw authError;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const getCurrentAuthenticatedUser = async (): Promise<AuthUser | null> => {
-    setIsLoading(true);
-    try {
-      const currentUser = await getCurrentUser();
-      setUser(currentUser);
-      return currentUser;
-    } catch (err) {
-      setUser(null);
-      return null;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const clearError = (): void => {
-    setError(null);
-  };
+  }, [authStore.user, navigation]);
 
   return {
-    user,
-    authSignIn,
-    authSignOut,
-    getCurrentAuthenticatedUser,
-    isLoading,
-    error,
-    clearError,
+    user: authStore.user,
+    authSignIn: authStore.signIn,
+    authSignOut: authStore.signOut,
+    isLoading: authStore.isLoading,
+    error: authStore.error,
+    clearError: authStore.clearError,
   };
 };

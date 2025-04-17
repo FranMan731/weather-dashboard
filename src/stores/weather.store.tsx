@@ -2,12 +2,13 @@ import { makeAutoObservable } from "mobx";
 import { WeatherResponse } from "@/types/weather";
 import { fetchWeatherByCity, fetchWeatherByCoords } from "../api/weatherApi";
 import * as Location from "expo-location";
+import { ApiError, toApiError } from "@/types/errors";
 
 class WeatherStore {
   searchText: string = "";
   isSearching: boolean = false;
   weatherData: WeatherResponse | null = null;
-  error: string | null = null;
+  error: ApiError | null = null;
 
   constructor() {
     makeAutoObservable(this);
@@ -19,7 +20,7 @@ class WeatherStore {
 
   async searchWeather(): Promise<void> {
     if (!this.searchText.trim()) {
-      this.error = "Please enter a city name";
+      this.error = toApiError("Please enter a city name");
       return;
     }
 
@@ -30,8 +31,9 @@ class WeatherStore {
       const data = await fetchWeatherByCity(this.searchText);
       this.weatherData = data;
     } catch (err) {
-      this.error =
-        err instanceof Error ? err.message : "Failed to fetch weather data";
+      this.error = toApiError(
+        err instanceof Error ? err.message : "Failed to fetch weather data"
+      );
     } finally {
       this.isSearching = false;
     }
@@ -49,8 +51,9 @@ class WeatherStore {
       );
       this.weatherData = data;
     } catch (err) {
-      this.error =
-        err instanceof Error ? err.message : "Failed to get current position";
+      this.error = toApiError(
+        err instanceof Error ? err.message : "Failed to get current position"
+      );
     } finally {
       this.isSearching = false;
     }
@@ -89,3 +92,4 @@ class WeatherStore {
 }
 
 export const weatherStore = new WeatherStore();
+export type WeatherStoreType = WeatherStore;

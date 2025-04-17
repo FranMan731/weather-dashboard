@@ -4,6 +4,7 @@ import { styles } from "./styles";
 import { SafeAreaView } from "react-native-safe-area-context";
 import LatestSearches from "./components/LatestSearches";
 import { useStore } from "@/stores/storeContext";
+import { getLocationErrorText } from "@/utils/location.utils";
 
 const SearchScreen = () => {
   const {
@@ -13,7 +14,7 @@ const SearchScreen = () => {
       searchWeather,
       setSearchText,
       searchByCurrentPosition,
-      error
+      error,
     },
   } = useStore();
 
@@ -23,13 +24,6 @@ const SearchScreen = () => {
 
   const handleCurrentPositionSearch = () => {
     searchByCurrentPosition();
-  };
-
-  const getLocationErrorText = (error: string | null) => {
-    if (error?.includes('Permission')) {
-      return 'Please enable location permissions in settings';
-    }
-    return error || '';
   };
 
   return (
@@ -90,12 +84,12 @@ const SearchScreen = () => {
         </View>
 
         {error && (
-        <Text style={styles.errorText}>
-          {error.includes('location') 
-            ? getLocationErrorText(error)
-            : error}
-        </Text>
-      )}
+          <Text style={styles.errorText}>
+            {error.message.includes("location")
+              ? getLocationErrorText(error)
+              : error.message}
+          </Text>
+        )}
       </SafeAreaView>
     </View>
   );

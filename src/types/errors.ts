@@ -5,6 +5,23 @@ export type ApiError = {
 };
 
 export const toApiError = (error: unknown): ApiError => {
+  //Controling Cognito Errors
+  if (typeof error === 'object' && error !== null) {
+    const cognitoError = error as { 
+      code?: string; 
+      message?: string;
+      name?: string;
+    };
+    
+    if (cognitoError.code) {
+      return {
+        message: cognitoError.message || cognitoError.code,
+        code: parseInt(cognitoError.code) || undefined,
+        details: cognitoError
+      };
+    }
+  }
+
   if (error instanceof Error) {
     return {
       message: error.message,

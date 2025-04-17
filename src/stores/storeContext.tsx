@@ -1,12 +1,15 @@
 import React, { createContext, useContext } from 'react';
 import { weatherStore, WeatherStoreType} from './weather.store';
+import { authStore, AuthStoreType } from './auth.store';
 
 interface Stores {
   weatherStore: WeatherStoreType;
+  authStore: AuthStoreType;
 }
 
 const stores: Stores = {
   weatherStore,
+  authStore
 };
 
 const StoreContext = createContext<Stores>(stores);
