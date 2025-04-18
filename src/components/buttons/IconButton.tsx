@@ -2,7 +2,7 @@ import React from 'react';
 import { BaseButton } from './BaseButton';
 import { Ionicons } from '@expo/vector-icons';
 import { useStyles } from '@/hooks/useStyles';
-import { useTheme } from '@/theme/ThemeContext';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface IconButtonProps {
   iconName: React.ComponentProps<typeof Ionicons>['name'];

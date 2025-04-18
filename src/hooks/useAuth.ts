@@ -1,4 +1,4 @@
-import { useStore } from '@/stores/storeContext';
+import { useStore } from '@/contexts/StoreContext';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '@/types/navigation';

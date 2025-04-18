@@ -6,6 +6,7 @@ export const darkTheme = {
       
       // Background
       background: '#121212',
+      blueVariant: '#1f2937',
       surface: '#1e1e1e',
       surfaceVariant: '#252525',
       
@@ -25,6 +26,14 @@ export const darkTheme = {
       divider: '#252525',
       overlay: 'rgba(0, 0, 0, 0.8)',
       
+      // Banners
+      banner: {
+        error: {
+          background: '#fee2e2',
+          text: '#dc2626'
+        }
+      },
+      
       // Buttons
       button: {
         primary: '#3b82f6',
@@ -33,8 +42,13 @@ export const darkTheme = {
         secondaryText: '#f0f0f0',
         disabled: '#252525',
         disabledText: '#666666',
+        pressed: '#2563eb'
       },
-      
+ 
+      // Icons
+      icon: {
+        inactive: '#9ca3af'
+      },
       // Inputs
       input: {
         background: '#1e1e1e',

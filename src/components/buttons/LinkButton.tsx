@@ -1,59 +1,48 @@
 import React from 'react';
-import { TouchableOpacity, Text } from 'react-native';
-import { useStyles } from '@/hooks/useStyles';
-import { useTheme } from '@/theme/ThemeContext';
+import { TouchableOpacity, ViewStyle } from 'react-native';
+import { Text } from '@/components/texts/Text';
+import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface LinkButtonProps {
-  title: string;
+  children: React.ReactNode;
   onPress: () => void;
   disabled?: boolean;
-  underline?: boolean;
+  icon?: React.ComponentProps<typeof Ionicons>['name'];
+  style?: ViewStyle;
 }
 
 export const LinkButton: React.FC<LinkButtonProps> = ({
-  title,
+  children,
   onPress,
   disabled = false,
-  underline = false,
+  icon,
+  style,
 }) => {
-  const styles = useLinkButtonStyles();
+  const theme = useTheme();
   
   return (
     <TouchableOpacity
       onPress={onPress}
       disabled={disabled}
-      style={styles.linkContainer}
-      activeOpacity={0.6}
+      style={[{
+        flexDirection: 'row',
+        alignItems: 'center',
+        opacity: disabled ? 0.6 : 1,
+      }, style]}
+      activeOpacity={0.7}
     >
-      <Text style={[
-        styles.linkText,
-        underline && styles.underline,
-        disabled && styles.disabled
-      ]}>
-        {title}
+      {icon && (
+        <Ionicons
+          name={icon}
+          size={18}
+          color={theme.colors.primary}
+          style={{ marginRight: 8 }}
+        />
+      )}
+      <Text style={{ color: theme.colors.primary }}>
+        {children}
       </Text>
     </TouchableOpacity>
   );
-};
-
-const useLinkButtonStyles = () => {
-  const theme = useTheme();
-  
-  return useStyles().create({
-    linkContainer: {
-      padding: theme.spacing.s,
-      alignSelf: 'flex-start',
-    },
-    linkText: {
-      color: theme.colors.primary,
-      fontSize: theme.typography.body.fontSize,
-    },
-    underline: {
-      textDecorationLine: 'underline',
-    },
-    disabled: {
-      color: theme.colors.textDisabled,
-      opacity: 0.6,
-    },
-  });
 };

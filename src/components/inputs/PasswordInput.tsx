@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { TextInputBase } from "./TextInputBase";
 import { Ionicons } from "@expo/vector-icons";
-import { TouchableOpacity, View } from "react-native";
-import { useTheme } from "@/theme/ThemeContext";
+import { Pressable, TouchableOpacity, View } from "react-native";
+import { useTheme } from '@/contexts/ThemeContext';
 import { useStyles } from "@/hooks/useStyles";
 
 export const PasswordInput: React.FC<
@@ -12,21 +12,30 @@ export const PasswordInput: React.FC<
   const theme = useTheme();
   const styles = useInputIconStyles();
 
+  const toggleSecureEntry = () => {
+    setSecureTextEntry(!secureTextEntry);
+  };
+
   return (
     <View style={styles.container}>
       <TextInputBase
+        style={[styles.input, styles.passwordInput]}
+        value={props.value}
+        onChangeText={props.onChangeText}
+        placeholder={props.placeholder}
         secureTextEntry={secureTextEntry}
-        {...props}
-        style={[styles.input, styles.inputWithRightIcon, props.style]}
-        {...props}
+        autoCapitalize="none"
+        editable={props.editable}
+        label={props.label}
       />
-      <TouchableOpacity onPress={() => setSecureTextEntry(!secureTextEntry)}>
+      <Pressable onPress={toggleSecureEntry}>
         <Ionicons
           name={secureTextEntry ? "eye-off" : "eye"}
           size={20}
           color={theme.colors.textSecondary}
+          style={styles.iconRight}
         />
-      </TouchableOpacity>
+      </Pressable>
     </View>
   );
 };
@@ -41,13 +50,20 @@ const useInputIconStyles = () => {
       alignItems: "center",
     },
     iconRight: {
-      marginLeft: theme.spacing.s,
+      position: 'absolute',
+      right: theme.spacing.m,
+      zIndex: 1,
+      top: -5
     },
     input: {
       flex: 1,
+      paddingVertical: theme.spacing.l,
     },
     inputWithRightIcon: {
       paddingRight: theme.spacing.m,
+    },
+    passwordInput: {
+      paddingRight: theme.spacing.xxl,
     },
   });
 };

@@ -1,7 +1,14 @@
 import React from "react";
-import { TouchableOpacity, Text, ViewStyle, TextStyle } from "react-native";
+import {
+  TouchableOpacity,
+  Text,
+  ViewStyle,
+  TextStyle,
+  ActivityIndicator,
+  Pressable,
+} from "react-native";
 import { useStyles } from "@/hooks/useStyles";
-import { useTheme } from "@/theme/ThemeContext";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface BaseButtonProps {
   children: React.ReactNode;
@@ -9,6 +16,7 @@ interface BaseButtonProps {
   style?: ViewStyle;
   textStyle?: TextStyle;
   disabled?: boolean;
+  isLoading?: boolean;
 }
 
 export const BaseButton: React.FC<BaseButtonProps> = ({
@@ -16,19 +24,29 @@ export const BaseButton: React.FC<BaseButtonProps> = ({
   onPress,
   style,
   textStyle,
+  isLoading = false,
   disabled = false,
 }) => {
   const styles = useButtonStyles();
 
   return (
-    <TouchableOpacity
-      style={[styles.baseButton, style, { opacity: disabled ? 0.6 : 1 }]}
+    <Pressable
+      style={({ pressed }) => [
+        styles.baseButton,
+        style,
+        { opacity: disabled ? 0.6 : 1 },
+        pressed && styles.buttonPressed,
+        isLoading && styles.buttonDisabled,
+      ]}
       onPress={onPress}
       disabled={disabled}
-      activeOpacity={0.8}
     >
-      <Text style={[styles.baseButtonText, textStyle]}>{children}</Text>
-    </TouchableOpacity>
+      {isLoading ? (
+        <ActivityIndicator color="#fff" />
+      ) : (
+        <Text style={[styles.baseButtonText, textStyle]}>{children}</Text>
+      )}
+    </Pressable>
   );
 };
 
@@ -47,6 +65,12 @@ const useButtonStyles = () => {
     baseButtonText: {
       fontWeight: "600" as const,
       fontSize: theme.typography.body.fontSize,
+    },
+    buttonPressed: {
+      backgroundColor: theme.colors.button.pressed,
+    },
+    buttonDisabled: {
+      backgroundColor: theme.colors.button.disabled,
     },
   });
 };

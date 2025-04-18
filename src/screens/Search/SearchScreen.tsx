@@ -1,10 +1,12 @@
-import { View, Text, TextInput, Pressable } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { styles } from "./styles";
+import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import LatestSearches from "./components/LatestSearches";
-import { useStore } from "@/stores/storeContext";
+import { useStore } from "@/contexts/StoreContext";
 import { getLocationErrorText } from "@/utils/location.utils";
+import { useStyles } from "@/hooks/useStyles";
+import { TextInputWithIcon } from "@/components/inputs";
+import { PrimaryButton, LinkButton } from "@/components/buttons";
+import { Text } from "@/components/texts/Text";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const SearchScreen = () => {
   const {
@@ -18,6 +20,8 @@ const SearchScreen = () => {
     },
   } = useStore();
 
+  const styles = useSearchScreenStyles();
+
   const handleSearch = () => {
     searchWeather();
   };
@@ -27,60 +31,41 @@ const SearchScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <SafeAreaView style={{ flex: 1 }}>
-        <Text style={styles.title}>Weather Search</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <Text style={styles.title} variant="h2">
+          Weather Search
+        </Text>
 
-        <View style={styles.searchContainer}>
-          <TextInput
-            style={styles.input}
+        <View style={styles.inputContainer}>
+          <TextInputWithIcon
+            iconName="search"
             placeholder="Enter city or location"
             value={searchText}
             onChangeText={setSearchText}
-            placeholderTextColor="#999"
+            style={styles.input}
+            editable={!isSearching}
+            iconPosition="right"
           />
-          <Pressable
-            style={({ pressed }) => [
-              styles.searchButton,
-              pressed && styles.buttonPressed,
-              isSearching && styles.buttonDisabled,
-            ]}
-            onPress={handleSearch}
-            disabled={isSearching}
-          >
-            <Ionicons
-              name="search"
-              size={20}
-              color={
-                isSearching
-                  ? styles.disabledIcon.color
-                  : styles.activeIcon.color
-              }
-            />
-          </Pressable>
         </View>
 
         <View style={styles.buttonsContainer}>
-          <Pressable
-            style={({ pressed }) => [
-              styles.linkButton,
-              pressed && styles.linkButtonPressed,
-              isSearching && styles.buttonDisabled,
-            ]}
+          <PrimaryButton
+            onPress={handleSearch}
+            disabled={isSearching}
+            isLoading={isSearching}
+            style={styles.searchButton}
+            title={isSearching ? "Searching..." : "Search"}
+          />
+
+          <LinkButton
             onPress={handleCurrentPositionSearch}
             disabled={isSearching}
+            icon="navigate"
+            style={styles.locationButton}
           >
-            <Ionicons
-              name="navigate"
-              size={18}
-              color={
-                isSearching ? styles.disabledIcon.color : styles.linkText.color
-              }
-            />
-            <Text style={styles.linkText}>
-              {isSearching ? "Searching..." : "Current Position"}
-            </Text>
-          </Pressable>
+            Current Position
+          </LinkButton>
         </View>
 
         {error && (
@@ -90,9 +75,56 @@ const SearchScreen = () => {
               : error.message}
           </Text>
         )}
-      </SafeAreaView>
-    </View>
+      </View>
+    </SafeAreaView>
   );
+};
+
+const useSearchScreenStyles = () => {
+  const theme = useTheme();
+  const { create } = useStyles();
+
+  return create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    container: {
+      flex: 1,
+      paddingHorizontal: theme.spacing.m,
+      paddingTop: theme.spacing.xxl,
+    },
+    title: {
+      color: theme.colors.text,
+      fontSize: theme.typography.h2.fontSize,
+      fontWeight: theme.typography.h2.fontWeight,
+      marginBottom: theme.spacing.xxl,
+      textAlign: "center",
+    },
+    inputContainer: {
+      marginBottom: theme.spacing.xs,
+      paddingHorizontal: 10,
+    },
+    input: {
+      width: '100%',
+    },
+    buttonsContainer: {
+      gap: theme.spacing.s,
+      paddingHorizontal: 10,
+    },
+    searchButton: {
+      width: '100%',
+    },
+    locationButton: {
+      alignSelf: "center",
+    },
+    errorText: {
+      color: theme.colors.error,
+      textAlign: "center",
+      marginTop: theme.spacing.m,
+      paddingHorizontal: theme.spacing.m,
+    },
+  });
 };
 
 export default SearchScreen;

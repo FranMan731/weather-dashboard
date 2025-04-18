@@ -8,7 +8,7 @@ import {
   ViewStyle,
 } from "react-native";
 import { useStyles } from "@/hooks/useStyles";
-import { useTheme } from "@/theme/ThemeContext";
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface TextInputBaseProps extends TextInputProps {
   label?: string;
@@ -51,6 +51,7 @@ const useInputStyles = () => {
   return create({
     container: {
       marginBottom: theme.spacing.m,
+      width: '100%'
     },
     label: {
       color: theme.colors.text,
@@ -58,13 +59,14 @@ const useInputStyles = () => {
       marginBottom: theme.spacing.s,
     },
     input: {
+      width: '100%',
       backgroundColor: theme.colors.input.background,
       color: theme.colors.input.text,
       borderWidth: 1,
       borderColor: theme.colors.input.border,
       borderRadius: theme.borderRadius.medium,
       paddingHorizontal: theme.spacing.m,
-      paddingVertical: theme.spacing.s,
+      paddingVertical: theme.spacing.l,
       fontSize: theme.typography.body.fontSize,
     },
     placeholder: {

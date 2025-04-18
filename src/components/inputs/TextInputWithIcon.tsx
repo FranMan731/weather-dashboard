@@ -1,11 +1,10 @@
 import React from 'react';
-import { View } from 'react-native';
+import { View, StyleSheet, TextInputProps } from 'react-native';
 import { TextInputBase } from './TextInputBase';
-import { useTheme } from '@/theme/ThemeContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
-import { useStyles } from '@/hooks/useStyles';
 
-interface TextInputWithIconProps extends React.ComponentProps<typeof TextInputBase> {
+interface TextInputWithIconProps extends TextInputProps {
   iconName: React.ComponentProps<typeof Ionicons>['name'];
   iconPosition?: 'left' | 'right';
 }
@@ -17,8 +16,8 @@ export const TextInputWithIcon: React.FC<TextInputWithIconProps> = ({
   ...props
 }) => {
   const theme = useTheme();
-  const styles = useInputIconStyles();
-  
+  const styles = useInputIconStyles(theme);
+
   return (
     <View style={styles.container}>
       {iconPosition === 'left' && (
@@ -29,7 +28,7 @@ export const TextInputWithIcon: React.FC<TextInputWithIconProps> = ({
           style={styles.iconLeft}
         />
       )}
-      
+
       <TextInputBase
         style={[
           styles.input,
@@ -39,7 +38,7 @@ export const TextInputWithIcon: React.FC<TextInputWithIconProps> = ({
         ]}
         {...props}
       />
-      
+
       {iconPosition === 'right' && (
         <Ionicons
           name={iconName}
@@ -52,29 +51,36 @@ export const TextInputWithIcon: React.FC<TextInputWithIconProps> = ({
   );
 };
 
-const useInputIconStyles = () => {
-  const theme = useTheme();
-  const { create } = useStyles();
-  
-  return create({
+const useInputIconStyles = (theme: ReturnType<typeof useTheme>) =>
+  StyleSheet.create({
     container: {
-      flexDirection: 'row',
-      alignItems: 'center',
+      position: 'relative',
+      justifyContent: 'center',
     },
     iconLeft: {
-      marginRight: theme.spacing.s,
+      position: 'absolute',
+      left: theme.spacing.m,
+      zIndex: 1,
     },
     iconRight: {
-      marginLeft: theme.spacing.s,
+      position: 'absolute',
+      right: theme.spacing.m,
+      zIndex: 1,
+      top: 10
     },
     input: {
-      flex: 1,
+      paddingVertical: 10,
+      paddingHorizontal: theme.spacing.m,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      color: theme.colors.textSecondary,
+      backgroundColor: theme.colors.background,
     },
     inputWithLeftIcon: {
-      paddingLeft: theme.spacing.m,
+      paddingLeft: theme.spacing.xxl, // espacio para el ícono
     },
     inputWithRightIcon: {
-      paddingRight: theme.spacing.m,
+      paddingRight: theme.spacing.xxl,
     },
   });
-};
