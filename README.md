@@ -15,7 +15,7 @@
 
 ```bash
 git clone https://github.com/FranMan731/weather-dashboard.git
-cd weather-app
+cd weather-dashboard
 ```
 
 2. **Install dependencies**:
@@ -47,20 +47,20 @@ Then choose your preferred method:
 ### 📁 Project Structure
 
 src/
-├── api/             # API Calls to OpenWeather
-├── components/      # Reusable UI components
-├── constants/       # Constants and config
-├── contexts/        # Context providers
-├── lib/             # GraphQL operations
-├── hooks/           # Custom hooks
-├── navigation/      # App navigation
-├── screens/         # App screens
-├── stores/          # MobX state stores
-├── theme/           # Design system
-├── types/           # TypeScript definitions
-├── utils/           # Common functions
-├── App.tsx          # Root component
-└── AppProviders.tsx # Context wrapper
+├── api/             # API Calls to OpenWeather  
+├── components/      # Reusable UI components  
+├── constants/       # Constants and config  
+├── contexts/        # Context providers  
+├── lib/             # GraphQL operations  
+├── hooks/           # Custom hooks  
+├── navigation/      # App navigation  
+├── screens/         # App screens  
+├── stores/          # MobX state stores  
+├── theme/           # Design system  
+├── types/           # TypeScript definitions  
+├── utils/           # Common functions  
+├── App.tsx          # Root component  
+└── AppProviders.tsx # Context wrapper  
 
 ### ✨ Key Features
 
