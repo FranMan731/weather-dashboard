@@ -46,7 +46,8 @@ Then choose your preferred method:
 
 ### 📁 Project Structure
 
-src/
+```bash
+src/  
 ├── api/             # API Calls to OpenWeather  
 ├── components/      # Reusable UI components  
 ├── constants/       # Constants and config  
@@ -61,6 +62,7 @@ src/
 ├── utils/           # Common functions  
 ├── App.tsx          # Root component  
 └── AppProviders.tsx # Context wrapper  
+```
 
 ### ✨ Key Features
 
