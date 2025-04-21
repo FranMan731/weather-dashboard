@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { useStyles } from "@/hooks/useStyles";
 import { useTheme } from '@/contexts/ThemeContext';
+import { observer } from "mobx-react-lite";
 
 interface TextInputBaseProps extends TextInputProps {
   label?: string;
@@ -18,7 +19,7 @@ interface TextInputBaseProps extends TextInputProps {
   errorStyle?: TextStyle;
 }
 
-export const TextInputBase: React.FC<TextInputBaseProps> = ({
+export const TextInputBase: React.FC<TextInputBaseProps> = observer(({
   label,
   error,
   containerStyle,
@@ -42,7 +43,7 @@ export const TextInputBase: React.FC<TextInputBaseProps> = ({
       {error && <Text style={[styles.error, errorStyle]}>{error}</Text>}
     </View>
   );
-};
+});
 
 const useInputStyles = () => {
   const theme = useTheme();

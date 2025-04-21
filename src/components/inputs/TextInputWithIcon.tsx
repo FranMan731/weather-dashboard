@@ -3,13 +3,14 @@ import { View, StyleSheet, TextInputProps } from 'react-native';
 import { TextInputBase } from './TextInputBase';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
+import { observer } from 'mobx-react-lite';
 
 interface TextInputWithIconProps extends TextInputProps {
   iconName: React.ComponentProps<typeof Ionicons>['name'];
   iconPosition?: 'left' | 'right';
 }
 
-export const TextInputWithIcon: React.FC<TextInputWithIconProps> = ({
+export const TextInputWithIcon: React.FC<TextInputWithIconProps> = observer(({
   iconName,
   iconPosition = 'left',
   style,
@@ -49,7 +50,7 @@ export const TextInputWithIcon: React.FC<TextInputWithIconProps> = ({
       )}
     </View>
   );
-};
+});
 
 const useInputIconStyles = (theme: ReturnType<typeof useTheme>) =>
   StyleSheet.create({

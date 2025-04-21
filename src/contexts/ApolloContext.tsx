@@ -7,7 +7,7 @@ import { ApiError, toApiError, getErrorMessage } from '../types/errors';
 type ApolloContextType = {
   client: ApolloClient<any>;
   isLoading: boolean;
-  error: ApiError | null; // Tipo actualizado
+  error: ApiError | null;
 };
 
 const ApolloContext = createContext<ApolloContextType>({
@@ -19,7 +19,7 @@ const ApolloContext = createContext<ApolloContextType>({
 export const ApolloProvider = ({ children }: { children: React.ReactNode }) => {
   const [client, setClient] = useState<ApolloClient<any>>();
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<ApiError | null>(null); // Tipo actualizado
+  const [error, setError] = useState<ApiError | null>(null);
 
   useEffect(() => {
     initializeApolloClient();
@@ -63,7 +63,7 @@ export const ApolloProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   if (!client) {
-    return null; // or loading indicator
+    return null;
   }
 
   return (

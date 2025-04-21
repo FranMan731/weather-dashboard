@@ -1,5 +1,4 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { NavigationContainer } from "@react-navigation/native";
 import { useAuth } from "@/hooks/useAuth";
 import { ActivityIndicator, View } from "react-native";
 

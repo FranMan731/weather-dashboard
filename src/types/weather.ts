@@ -1,3 +1,5 @@
+import { ApiError } from "./errors";
+
 export interface WeatherResponse {
   coord: Coord;
   weather: Weather[];
@@ -59,4 +61,11 @@ export interface Sys {
   country: string;
   sunrise: number;
   sunset: number;
+}
+
+export interface WeatherStoreType {
+  weatherData: WeatherResponse | null;
+  isSearching: boolean;
+  error: ApiError | null;
+  searchWeather: (city: string) => Promise<void>;
 }

@@ -83,6 +83,11 @@ export const darkTheme = {
         fontWeight: 'bold',
         lineHeight: 32,
       },
+      h3: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        lineHeight: 24,
+      },
       body: {
         fontSize: 16,
         lineHeight: 24,

@@ -1,7 +1,7 @@
 import React from 'react';
+import { StoreProvider } from "@/contexts/StoreContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ApolloProvider } from "@/contexts/ApolloContext";
-import { StoreProvider } from "@/contexts/StoreContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 
 interface AppProvidersProps {
@@ -11,13 +11,13 @@ interface AppProvidersProps {
 export const AppProviders = ({ children }: AppProvidersProps) => {
   return (
     <ThemeProvider>
-      <StoreProvider>
-        <AuthProvider>
-          <ApolloProvider>
+      <ApolloProvider>
+        <StoreProvider>
+          <AuthProvider>
             {children}
-          </ApolloProvider>
-        </AuthProvider>
-      </StoreProvider>
+          </AuthProvider>
+        </StoreProvider>
+      </ApolloProvider>
     </ThemeProvider>
   );
 };

@@ -9,7 +9,7 @@ export const useAuth = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   useEffect(() => {
-    if (authStore.user) {
+    if (authStore.user && navigation) {
       navigation.reset({
         index: 0,
         routes: [{ name: 'Main' }],
