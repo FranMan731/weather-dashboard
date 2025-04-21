@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import { TextInputBase } from "./TextInputBase";
 import { Ionicons } from "@expo/vector-icons";
-import { Pressable, TouchableOpacity, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { useTheme } from '@/contexts/ThemeContext';
 import { useStyles } from "@/hooks/useStyles";
+import { observer } from "mobx-react-lite";
 
 export const PasswordInput: React.FC<
   React.ComponentProps<typeof TextInputBase>
-> = (props) => {
+> = observer((props) => {
   const [secureTextEntry, setSecureTextEntry] = useState(true);
   const theme = useTheme();
   const styles = useInputIconStyles();
@@ -19,9 +20,8 @@ export const PasswordInput: React.FC<
   return (
     <View style={styles.container}>
       <TextInputBase
-        style={[styles.input, styles.passwordInput]}
-        value={props.value}
-        onChangeText={props.onChangeText}
+        {...props}
+        style={styles.input}
         placeholder={props.placeholder}
         secureTextEntry={secureTextEntry}
         autoCapitalize="none"
@@ -38,7 +38,7 @@ export const PasswordInput: React.FC<
       </Pressable>
     </View>
   );
-};
+});
 
 const useInputIconStyles = () => {
   const theme = useTheme();
@@ -56,8 +56,8 @@ const useInputIconStyles = () => {
       top: -5
     },
     input: {
-      flex: 1,
-      paddingVertical: theme.spacing.l,
+      width: '100%',
+      paddingVertical: theme.spacing.m,
     },
     inputWithRightIcon: {
       paddingRight: theme.spacing.m,

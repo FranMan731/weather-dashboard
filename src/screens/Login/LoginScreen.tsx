@@ -13,7 +13,7 @@ const LoginScreen = observer(() => {
   const { authSignIn, isLoading, error, clearError } = useAuth();
 
   const {
-    authStore: { username, password, setUsername, setPassword },
+    authStore,
   } = useStore();
 
   const theme = useTheme();
@@ -33,8 +33,8 @@ const LoginScreen = observer(() => {
       <View style={{ marginBottom: 30 }}>
         <TextInputStandard
           label="Email"
-          value={username}
-          onChangeText={setUsername}
+          value={authStore.username}
+          onChangeText={(text) => authStore.setUsername(text)}
           placeholder="Enter email"
           keyboardType="email-address"
           editable={!isLoading}
@@ -42,9 +42,9 @@ const LoginScreen = observer(() => {
         />
 
         <PasswordInput
-          label="Contraseña"
-          value={password}
-          onChangeText={setPassword}
+          label="Password"
+          value={authStore.password}
+          onChangeText={(text) => authStore.setPassword(text)}
           placeholder="Enter password"
           editable={!isLoading}
         />

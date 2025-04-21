@@ -1,3 +1,4 @@
+import { CognitoUser } from "@aws-amplify/auth";
 import { ApiError } from "./errors";
 
 export type AuthUser = {
@@ -36,8 +37,8 @@ export type AuthUser = {
 };
 
 export type AuthContextType = {
-  user: AuthUser | null;
-  signIn: (username: string, password: string) => Promise<AuthUser>;
+  user: CognitoUser | null;
+  signIn: () => Promise<void>;
   signOut: () => Promise<void>;
   isLoading: boolean;
   error: ApiError | null;

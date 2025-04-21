@@ -5,29 +5,30 @@ import { fetchAuthSession } from '../lib/api';
 import { ApiError, toApiError, getErrorMessage } from '../types/errors';
 
 type ApolloContextType = {
-  client: ApolloClient<any>;
+  client: ApolloClient<any> | null;
   isLoading: boolean;
   error: ApiError | null;
+  initializeApolloClient: () => Promise<void>;
+  clearClient: () => void;
 };
 
 const ApolloContext = createContext<ApolloContextType>({
-  client: null as any,
+  client: null,
   isLoading: false,
   error: null,
+  initializeApolloClient: async () => {},
+  clearClient: () => {}
 });
 
 export const ApolloProvider = ({ children }: { children: React.ReactNode }) => {
-  const [client, setClient] = useState<ApolloClient<any>>();
-  const [isLoading, setIsLoading] = useState(true);
+  const [client, setClient] = useState<ApolloClient<any> | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
-
-  useEffect(() => {
-    initializeApolloClient();
-  }, []);
 
   const initializeApolloClient = async () => {
     try {
       setIsLoading(true);
+      setError(null);
 
       const httpLink = createHttpLink({
         uri: 'https://nlop9z9t2e.execute-api.eu-west-1.amazonaws.com/',
@@ -54,21 +55,33 @@ export const ApolloProvider = ({ children }: { children: React.ReactNode }) => {
       });
 
       setClient(apolloClient);
-      setError(null);
     } catch (err) {
       setError(toApiError(err));
+      throw err;
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (!client) {
-    return null;
-  }
+  const clearClient = () => {
+    setClient(null);
+  };
 
   return (
-    <ApolloContext.Provider value={{ client, isLoading, error }}>
-      <BaseApolloProvider client={client}>{children}</BaseApolloProvider>
+    <ApolloContext.Provider 
+      value={{ 
+        client, 
+        isLoading, 
+        error, 
+        initializeApolloClient,
+        clearClient
+      }}
+    >
+      {client ? (
+        <BaseApolloProvider client={client}>{children}</BaseApolloProvider>
+      ) : (
+        children
+      )}
     </ApolloContext.Provider>
   );
 };

@@ -2,7 +2,7 @@ import { makeAutoObservable, runInAction } from "mobx";
 import { WeatherResponse } from "@/types/weather";
 import { ApolloClient } from "@apollo/client";
 import { UPSERT_ITEM } from "@/lib/graphql/mutations";
-import { LIST_ITEMS, GET_ITEM } from "@/lib/graphql/queries";
+import { LIST_ITEMS } from "@/lib/graphql/queries";
 import { FavoriteItem } from "@/types/favorites";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -13,7 +13,7 @@ class FavoriteStore {
   private readonly LOCAL_STORAGE_KEY = "FAVORITES_LOCAL";
   private syncInProgress = false;
 
-  constructor(private apolloClient: ApolloClient<any>) {
+  constructor(private apolloClient: ApolloClient<any> | null) {
     makeAutoObservable(this);
     this.initialize();
   }
@@ -21,9 +21,14 @@ class FavoriteStore {
   private async initialize(): Promise<void> {
     try {
       await this.loadFromLocalStorage();
-      this.syncWithBackend();
+      if (this.apolloClient) {
+        await this.syncWithBackend();
+      }
     } catch (error) {
       console.error("Initialization error:", error);
+      runInAction(() => {
+        this.error = "Failed to initialize favorites";
+      });
     }
   }
 
@@ -52,13 +57,15 @@ class FavoriteStore {
   }
 
   private async syncWithBackend(): Promise<void> {
-    if (this.syncInProgress) return;
+    if (!this.apolloClient || this.syncInProgress) return;
+    
     this.syncInProgress = true;
+    this.setLoading(true);
 
     try {
-      this.setLoading(true);
       const { data } = await this.apolloClient.query({
         query: LIST_ITEMS,
+        fetchPolicy: "network-only"
       });
 
       const remoteFavorites = data.listItems.map((item: any) => ({
@@ -68,23 +75,27 @@ class FavoriteStore {
       }));
 
       runInAction(() => {
-        const mergedFavorites = [...remoteFavorites];
-        this.favorites.forEach(localFav => {
-          const existingIndex = mergedFavorites.findIndex(f => f.id === localFav.id);
-          if (existingIndex === -1) {
-            mergedFavorites.push(localFav);
-          } else if (localFav.timestamp > mergedFavorites[existingIndex].timestamp) {
-            mergedFavorites[existingIndex] = localFav;
+        const merged = [...remoteFavorites];
+        this.favorites.forEach(local => {
+          const existing = merged.find(f => f.id === local.id);
+          if (!existing || local.timestamp > existing.timestamp) {
+            if (existing) {
+              merged[merged.indexOf(existing)] = local;
+            } else {
+              merged.push(local);
+            }
           }
         });
 
-        this.favorites = mergedFavorites;
+        this.favorites = merged;
         this.error = null;
         this.saveToLocalStorage();
       });
+
     } catch (error) {
       runInAction(() => {
-        console.error("Sync with backend failed, using local data:", error);
+        this.error = "Failed to sync with server";
+        console.error("Sync error:", error);
       });
     } finally {
       runInAction(() => {
@@ -95,7 +106,9 @@ class FavoriteStore {
   }
 
   async loadFavorites(): Promise<void> {
-    await this.syncWithBackend();
+    if (this.apolloClient) {
+      await this.syncWithBackend();
+    }
   }
 
   isFavorite(id: number): boolean {
@@ -116,23 +129,27 @@ class FavoriteStore {
       this.saveToLocalStorage();
     });
 
-    try {
-      await this.apolloClient.mutate({
-        mutation: UPSERT_ITEM,
-        variables: {
-          input: {
-            id: weatherData.id.toString(),
-            name: `${weatherData.name}, ${weatherData.sys.country}`,
-            content: JSON.stringify(weatherData),
-            metadata: {
-              type: "weather_favorite",
-              location: `${weatherData.coord.lat},${weatherData.coord.lon}`
+    if (this.apolloClient) {
+      try {
+        await this.apolloClient.mutate({
+          mutation: UPSERT_ITEM,
+          variables: {
+            input: {
+              id: weatherData.id.toString(),
+              name: `${weatherData.name}, ${weatherData.sys.country}`,
+              content: JSON.stringify(weatherData),
+              metadata: {
+                type: "weather_favorite",
+                location: `${weatherData.coord.lat},${weatherData.coord.lon}`
+              }
             }
           }
-        }
-      });
-    } catch (error) {
-      console.error("Failed to sync favorite with backend:", error);
+        });
+
+        await this.syncWithBackend();
+      } catch (error) {
+        console.error("Failed to sync favorite:", error);
+      }
     }
   }
 
@@ -142,25 +159,22 @@ class FavoriteStore {
       this.saveToLocalStorage();
     });
 
-    try {
-      await this.apolloClient.mutate({
-        mutation: UPSERT_ITEM,
-        variables: {
-          input: {
-            id: id.toString(),
-            content: null
+    /* if (this.apolloClient) {
+      try {
+        await this.apolloClient.mutate({
+          mutation: DELETE_ITEM,
+          variables: {
+            id: id.toString()
           }
-        }
-      });
-    } catch (error) {
-      console.error("Failed to sync favorite removal with backend:", error);
-    }
+        });
+      } catch (error) {
+        console.error("Failed to remove favorite:", error);
+      }
+    } */
   }
 
   private setLoading(loading: boolean): void {
-    runInAction(() => {
-      this.loading = loading;
-    });
+    this.loading = loading;
   }
 
   getFavoriteById(id: number): FavoriteItem | undefined {
@@ -168,11 +182,11 @@ class FavoriteStore {
   }
 
   async refreshFavorites(): Promise<void> {
-    await this.syncWithBackend();
+    await this.loadFavorites();
   }
 }
 
-export const createFavoriteStore = (apolloClient: ApolloClient<any>) => {
+export const createFavoriteStore = (apolloClient: ApolloClient<any> | null) => {
   return new FavoriteStore(apolloClient);
 };
 export type FavoriteStoreType = FavoriteStore;

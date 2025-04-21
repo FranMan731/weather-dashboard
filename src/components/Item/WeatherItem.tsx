@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -25,23 +25,43 @@ export const WeatherItem: React.FC<WeatherItemProps> = observer(
     const theme = useTheme();
     const { favoriteStore } = useStore();
     const styles = createStyles(theme);
+    const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
     const formatTemp = (temp: number) => `${Math.round(temp)}°C`;
 
     const weatherIcon = weatherData.weather[0].icon;
     const iconUrl = `https://openweathermap.org/img/wn/${weatherIcon}@4x.png`;
 
-    const toggleFavorite = async () => {
-      try {
-        if (favoriteStore.isFavorite(weatherData.id)) {
-          await favoriteStore.removeFavorite(weatherData.id);
-        } else {
-          await favoriteStore.addFavorite(weatherData);
-        }
-      } catch (error) {
-        console.error("Error toggling favorite:", error);
+    const toggleFavorite = useCallback(async () => {
+      if (debounceTimeout.current) {
+        clearTimeout(debounceTimeout.current);
       }
-    };
+
+      if (favoriteStore?.isFavorite(weatherData.id)) {
+        try {
+          await favoriteStore.removeFavorite(weatherData.id);
+        } catch (error) {
+          console.error("Error removing favorite:", error);
+        }
+        return;
+      }
+
+      debounceTimeout.current = setTimeout(async () => {
+        try {
+          await favoriteStore?.addFavorite(weatherData);
+        } catch (error) {
+          console.error("Error adding favorite:", error);
+        }
+      }, 300);
+    }, [favoriteStore, weatherData]);
+
+    useEffect(() => {
+      return () => {
+        if (debounceTimeout.current) {
+          clearTimeout(debounceTimeout.current);
+        }
+      };
+    }, []);
 
     return (
       <View style={[styles.container, style]}>
@@ -52,21 +72,21 @@ export const WeatherItem: React.FC<WeatherItemProps> = observer(
             </Text>
             <TouchableOpacity
               onPress={toggleFavorite}
-              disabled={favoriteStore.loading}
+              disabled={favoriteStore?.loading}
               style={styles.favoriteButton}
             >
-              {favoriteStore.loading ? (
+              {favoriteStore?.loading ? (
                 <ActivityIndicator size="small" color={theme.colors.primary} />
               ) : (
                 <Ionicons
                   name={
-                    favoriteStore.isFavorite(weatherData.id)
+                    favoriteStore?.isFavorite(weatherData.id)
                       ? "heart"
                       : "heart-outline"
                   }
                   size={24}
                   color={
-                    favoriteStore.isFavorite(weatherData.id)
+                    favoriteStore?.isFavorite(weatherData.id)
                       ? theme.colors.error
                       : theme.colors.textSecondary
                   }

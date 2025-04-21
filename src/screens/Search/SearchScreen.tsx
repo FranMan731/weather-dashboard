@@ -11,19 +11,82 @@ import { WeatherItem } from "@/components/Item/WeatherItem";
 import { observer } from "mobx-react-lite";
 import { RecentSearches } from "./components/RecentSearches";
 import { WeatherItemSkeleton } from "@/components/skeletons/WeatherItemSkeleton";
+import React, { useCallback, useMemo, useState, useEffect, useRef } from "react";
 
 const SearchScreen = observer(() => {
   const { weatherStore } = useStore();
-
+  const theme = useTheme();
   const styles = useSearchScreenStyles();
+  const [searchText, setSearchText] = useState(weatherStore.searchText);
+  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  const handleSearch = () => {
+  // Custom debounce implementation
+  const handleDebouncedSearch = useCallback(
+    (text: string) => {
+      // Clear any existing timeout
+      if (debounceTimeout.current) {
+        clearTimeout(debounceTimeout.current);
+      }
+      
+      // Set a new timeout
+      debounceTimeout.current = setTimeout(() => {
+        weatherStore.setSearchText(text);
+      }, 500);
+    },
+    [weatherStore]
+  );
+
+  // Update local state and execute debounced search
+  const handleTextChange = useCallback(
+    (text: string) => {
+      setSearchText(text);
+      handleDebouncedSearch(text);
+    },
+    [handleDebouncedSearch]
+  );
+
+  // Clean up timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimeout.current) {
+        clearTimeout(debounceTimeout.current);
+      }
+    };
+  }, []);
+
+  // Memoize search function
+  const handleSearch = useCallback(() => {
     weatherStore.searchWeather();
-  };
+  }, [weatherStore]);
 
-  const handleCurrentPositionSearch = async () => {
+  // Memoize current position search function
+  const handleCurrentPositionSearch = useCallback(async () => {
     await weatherStore.searchByCurrentPosition();
-  };
+  }, [weatherStore]);
+
+  // Memoize error message
+  const errorMessage = useMemo(() => {
+    if (!weatherStore.error) return null;
+    return weatherStore.error.message.includes("location")
+      ? getLocationErrorText(weatherStore.error)
+      : weatherStore.error.message;
+  }, [weatherStore.error]);
+
+  // Memoize WeatherItem component to avoid unnecessary rerenders
+  const weatherItem = useMemo(() => {
+    if (!weatherStore.weatherData || weatherStore.error) return null;
+    return <WeatherItem weatherData={weatherStore.weatherData} />;
+  }, [weatherStore.weatherData, weatherStore.error]);
+
+  // Memoize skeleton loader
+  const weatherSkeleton = useMemo(
+    () => (
+      <View style={styles.weatherItemContainer}>
+        <WeatherItemSkeleton />
+      </View>
+    ),
+    [styles.weatherItemContainer]
+  );
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -37,10 +100,8 @@ const SearchScreen = observer(() => {
             <TextInputWithIcon
               iconName="search"
               placeholder="Enter city or location"
-              value={weatherStore.searchText}
-              onChangeText={(text) => {
-                weatherStore.setSearchText(text);
-              }}
+              value={searchText}
+              onChangeText={handleTextChange}
               style={styles.input}
               editable={!weatherStore.isSearching}
               iconPosition="right"
@@ -57,7 +118,7 @@ const SearchScreen = observer(() => {
             />
 
             <LinkButton
-              onPress={() => handleCurrentPositionSearch()}
+              onPress={handleCurrentPositionSearch}
               disabled={weatherStore.isSearching}
               icon="navigate"
               style={styles.locationButton}
@@ -69,25 +130,14 @@ const SearchScreen = observer(() => {
           <RecentSearches />
 
           {weatherStore.error && (
-            <Text style={styles.errorText}>
-              {weatherStore.error.message.includes("location")
-                ? getLocationErrorText(weatherStore.error)
-                : weatherStore.error.message}
-            </Text>
+            <Text style={styles.errorText}>{errorMessage}</Text>
           )}
 
-          {weatherStore.isSearching ? (
-            <View style={styles.weatherItemContainer}>
-              <WeatherItemSkeleton />
-            </View>
-          ) : (
-            weatherStore.weatherData &&
-            !weatherStore.error && (
-              <View style={styles.weatherItemContainer}>
-                <WeatherItem weatherData={weatherStore.weatherData} />
-              </View>
-            )
-          )}
+          {weatherStore.isSearching
+            ? weatherSkeleton
+            : weatherItem && (
+                <View style={styles.weatherItemContainer}>{weatherItem}</View>
+              )}
         </View>
       </ScrollView>
     </SafeAreaView>

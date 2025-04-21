@@ -9,95 +9,61 @@ import { ErrorScreen } from '@/components/error/ErrorScreen';
 interface Stores {
   weatherStore: WeatherStoreType;
   authStore: AuthStoreType;
-  favoriteStore: FavoriteStoreType;
+  favoriteStore: FavoriteStoreType | null;
 }
 
-const StoreContext = createContext<Stores | null>(null);
+const StoreContext = createContext<Stores>({
+  weatherStore,
+  authStore,
+  favoriteStore: null
+});
 
 export const StoreProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
-  const { client: apolloClient, isLoading: apolloLoading, error: apolloError } = useApolloContext();
-  const [state, setState] = useState<{
-    stores: Stores | null;
-    loading: boolean;
-    error: Error | null;
-  }>({
-    stores: null,
-    loading: true,
-    error: null
-  });
-
-  const retryInitialization = () => {
-    setState({
-      stores: null,
-      loading: true,
-      error: null
-    });
-  };
+  const { client: apolloClient } = useApolloContext();
+  const [favoriteStore, setFavoriteStore] = useState<FavoriteStoreType | null>(null);
+  const [error, setError] = useState<Error | null>(null);
+  const [initializing, setInitializing] = useState(true);
 
   useEffect(() => {
-    if (apolloLoading) return;
-    
-    const initialize = async () => {
+    const initializeStore = async () => {
       try {
-        if (apolloError) throw new Error('Failed to initialize Apollo: ' + apolloError.message);
-        if (!apolloClient) throw new Error('Apollo client not available');
-        
-        const stores = {
-          weatherStore,
-          authStore,
-          favoriteStore: createFavoriteStore(apolloClient)
-        };
-        
-        setState({
-          stores,
-          loading: false,
-          error: null
-        });
-      } catch (error) {
-        setState({
-          stores: null,
-          loading: false,
-          error: error instanceof Error ? error : new Error('Unknown initialization error')
-        });
+        const newFavoriteStore = createFavoriteStore(apolloClient);
+        setFavoriteStore(newFavoriteStore);
+        setError(null);
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error('Failed to initialize stores'));
+      } finally {
+        setInitializing(false);
       }
     };
 
-    initialize();
-  }, [apolloClient, apolloLoading, apolloError]);
+    initializeStore();
+  }, [apolloClient]);
 
-  if (state.loading) {
+  const retryInitialization = () => {
+    setError(null);
+    setInitializing(true);
+  };
+
+  if (initializing) {
     return <LoadingScreen />;
   }
 
-  if (state.error) {
-    return (
-      <ErrorScreen 
-        error={state.error} 
-        onRetry={retryInitialization} 
-      />
-    );
-  }
-
-  if (!state.stores) {
-    return (
-      <ErrorScreen 
-        error={new Error('Application state not available')} 
-        onRetry={retryInitialization} 
-      />
-    );
+  if (error) {
+    return <ErrorScreen error={error} onRetry={retryInitialization} />;
   }
 
   return (
-    <StoreContext.Provider value={state.stores}>
+    <StoreContext.Provider value={{
+      weatherStore,
+      authStore,
+      favoriteStore
+    }}>
       {children}
     </StoreContext.Provider>
   );
 };
 
 export const useStore = (): Stores => {
-  const context = useContext(StoreContext);
-  if (!context) {
-    throw new Error('useStore must be used within a StoreProvider');
-  }
-  return context;
+  return useContext(StoreContext);
 };
